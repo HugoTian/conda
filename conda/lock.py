@@ -39,6 +39,7 @@ You can also use: $ conda clean --lock
 stdoutlog = logging.getLogger('stdoutlog')
 log = logging.getLogger(__name__)
 
+
 def touch(file_name, times=None):
     """ Touch function like touch in Unix shell
     :param file_name: the name of file
@@ -49,7 +50,8 @@ def touch(file_name, times=None):
     with open(file_name, 'a'):
         os.utime(file_name, times)
 
-class FileLock(object):
+
+class Locked(object):
     """
     Context manager to handle locks.
     """
@@ -71,6 +73,7 @@ class FileLock(object):
         last_glob_match = None
 
         for q in range(self.retries + 1):
+
             # search, whether there is process already locked on this file
             glob_result = glob(lock_glob_str)
             if glob_result:

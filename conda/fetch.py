@@ -16,9 +16,9 @@ import warnings
 from functools import wraps
 from logging import getLogger
 from os.path import basename, dirname, join
-from ._vendor.requests.exceptions import ConnectionError
+
 from ._vendor.requests.exceptions import SSLError, HTTPError
-#from ._vendor.requests.packages.urllib3.connection import ConnectionError
+from ._vendor.requests.packages.urllib3.connection import ConnectionError
 from ._vendor.requests.packages.urllib3.exceptions import InsecureRequestWarning
 from ._vendor.requests.packages.urllib3.util import parse_url
 from .compat import itervalues, input, urllib_quote, iterkeys, iteritems
@@ -178,6 +178,7 @@ def fetch_repodata(url, cache_dir=None, use_cache=False, session=None):
             handle_proxy_407(url, session)
             # Try again
             return fetch_repodata(url, cache_dir=cache_dir, use_cache=use_cache, session=session)
+
         msg = "Connection error: %s: %s\n" % (e, remove_binstar_tokens(url))
         stderrlog.info('Could not connect to %s\n' % remove_binstar_tokens(url))
         log.debug(msg)

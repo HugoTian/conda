@@ -17,8 +17,7 @@ from functools import wraps
 from logging import getLogger
 from os.path import basename, dirname, join
 
-from ._vendor.requests.exceptions import SSLError, HTTPError
-from ._vendor.requests.packages.urllib3.connection import ConnectionError
+from ._vendor.requests.exceptions import SSLError, HTTPError, ConnectionError
 from ._vendor.requests.packages.urllib3.exceptions import InsecureRequestWarning
 from ._vendor.requests.packages.urllib3.util import parse_url
 from .compat import itervalues, input, urllib_quote, iterkeys, iteritems
@@ -185,7 +184,7 @@ def fetch_repodata(url, cache_dir=None, use_cache=False, session=None):
         if fail_unknown_host:
             raise RuntimeError(msg)
 
-        raise ConnectionError(msg)
+        raise RuntimeError(msg)
     cache['_url'] = remove_binstar_tokens(url)
     try:
         with open(cache_path, 'w') as fo:

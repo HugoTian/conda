@@ -284,6 +284,9 @@ opdict = {'==': op.__eq__, '!=': op.__ne__, '<=': op.__le__,
 
 
 class VersionSpec(object):
+    """
+        The version class of a specification
+    """
     def exact_match_(self, vspec):
         return self.spec == vspec
 
@@ -303,6 +306,11 @@ class VersionSpec(object):
         return True
 
     def __new__(cls, spec):
+        """
+            The creation of a versionspec instance
+        :param spec: a number of spec
+        :return:
+        """
         if isinstance(spec, cls):
             return spec
         self = object.__new__(cls)

@@ -30,17 +30,43 @@ def dashlist(iter):
 
 
 class MatchSpec(object):
+    """
+        a class I have no idea
+        What the hell it is taking about !!!!!
+    """
     def __new__(cls, spec, target=Ellipsis, optional=Ellipsis, normalize=False):
+        """
+            The new step of creation of a instance
+        :param spec: The specification
+        :param target: the target, should be Ellipsis
+        :param optional: optional stuff, should be Ellipsis
+        :param normalize: whether to normalize the stuff
+        :return:
+
+        self.spec: the specification
+        self.target: the target list, None is not specified
+        self.optional: a bool list if specified, False otherwise
+        self.name: the package name, no version
+        self.strictness: 1 if no version, 2 if version specified
+        self.version: VersionSpec object for spec
+        self.build
+        self.match_fast
+        """
+        import pdb
+        pdb.set_trace()
         if isinstance(spec, cls):
             if target is Ellipsis and optional is Ellipsis and not normalize:
                 return spec
             target = spec.target if target is Ellipsis else target
             optional = spec.optional if optional is Ellipsis else optional
             spec = spec.spec
+
         self = object.__new__(cls)
         self.target = None if target is Ellipsis else target
         self.optional = False if optional is Ellipsis else bool(optional)
         spec, _, oparts = spec.partition('(')
+
+        # if there is () part, then update optional and target
         if oparts:
             if oparts.strip()[-1] != ')':
                 raise CondaValueError("Invalid MatchSpec: %s" % spec)
@@ -51,12 +77,18 @@ class MatchSpec(object):
                     self.target = opart.split('=')[1].strip()
                 else:
                     raise CondaValueError("Invalid MatchSpec: %s" % spec)
+
         spec = self.spec = spec.strip()
         parts = spec.split()
         nparts = len(parts)
-        assert 1 <= nparts <= 3, repr(spec)
+        # the number of parts should be 1,2,3
+        # change to raise a conda error
+        if not 1 <= nparts <= 3:
+            raise CondaValueError("Invalid specification: %s" % repr(spec))
         self.name = parts[0]
+        # if there is only name, no version
         if nparts == 1:
+            # there is no version required, match_any
             self.match_fast = self._match_any
             self.strictness = 1
             return self

@@ -209,6 +209,7 @@ class NoPackagesFoundError(CondaError, RuntimeError):
     '''
     def __init__(self, bad_deps, *args, **kwargs):
         from .resolve import dashlist
+        # subdir is the channel name
         from .base.context import subdir
 
         deps = set(q[-1].spec for q in bad_deps)
@@ -239,24 +240,36 @@ class UnsatisfiableError(CondaError, RuntimeError):
     '''
     def __init__(self, bad_deps, chains=True, *args, **kwargs):
         from .resolve import dashlist, MatchSpec
-
+        # convert to a list of list of dependencies
         bad_deps = [list(map(lambda x: x.spec, dep)) for dep in bad_deps]
         if chains:
             chains = {}
+            # sort by list length in reverse order
+            # dep are list of dependencies , like [u'gevent-websocket', u'python 2.6*']
             for dep in sorted(bad_deps, key=len, reverse=True):
+                # partition the dependencies into [name, " ", version] except the first one
+                # example (gevent-websocket', 'python)
                 dep1 = [str(MatchSpec(s)).partition(' ') for s in dep[1:]]
+                # key is first dependency and all other dependencies'name
                 key = (dep[0],) + tuple(v[0] for v in dep1)
+                # all the version number except the first one, ('', '2.6', )
                 vals = ('',) + tuple(v[2] for v in dep1)
                 found = False
                 for key2, csets in iteritems(chains):
+                    # if find same dependencies, merge the version numbers
                     if key2[:len(key)] == key:
                         for cset, val in zip(csets, vals):
                             cset.add(val)
                         found = True
                 if not found:
                     chains[key] = [{val} for val in vals]
-            bad_deps = []
+            # now the chains is a dictionary
+            # {(package1, package2) : [ set(1), set(2)]}
+            # where set(1) is all version found in bad_deps for package1
             for key, csets in iteritems(chains):
+                # for each key value pair in chains
+                # clean the name and version into a str list
+                # deps like ["package1 v1|v2 " , " package2 v3|v4"]
                 deps = []
                 for name, cset in zip(key, csets):
                     if '' not in cset:

@@ -31,8 +31,10 @@ def dashlist(iter):
 
 class MatchSpec(object):
     """
-        a class I have no idea
-        What the hell it is taking about !!!!!
+        A class tells matching info for a package
+        spec like :
+            name version build
+        need decide match function and result in different cases
     """
     def __new__(cls, spec, target=Ellipsis, optional=Ellipsis, normalize=False):
         """
@@ -43,17 +45,16 @@ class MatchSpec(object):
         :param normalize: whether to normalize the stuff
         :return:
 
-        self.spec: the specification
+        self.spec: the specification "name version build"
         self.target: the target list, None is not specified
         self.optional: a bool list if specified, False otherwise
         self.name: the package name, no version
         self.strictness: 1 if no version, 2 if version specified
         self.version: VersionSpec object for spec
         self.build
-        self.match_fast
+        self.match_fast: the match function used based on spec
         """
-        import pdb
-        pdb.set_trace()
+
         if isinstance(spec, cls):
             if target is Ellipsis and optional is Ellipsis and not normalize:
                 return spec
@@ -92,46 +93,95 @@ class MatchSpec(object):
             self.match_fast = self._match_any
             self.strictness = 1
             return self
-        self.strictness = 2
+        # get the VersionSpec object if version specified for package
         vspec = VersionSpec(parts[1])
+        # vspec.is_exact() means the version for the package is exact, like 4.1.10
         if vspec.is_exact():
             if nparts > 2 and '*' not in parts[2]:
                 self.version, self.build = parts[1:]
                 self.match_fast = self._match_exact
                 self.strictness = 3
                 return self
+            """
+                May be we can do better fot this block
+                Why not pass notmalize into version, and get a better return value
+            """
             if normalize and not parts[1].endswith('*'):
                 parts[1] += '*'
                 vspec = VersionSpec(parts[1])
                 self.spec = ' '.join(parts)
         self.version = vspec
+
         if nparts == 2:
+            # the spec is like conda 4.1.10
             self.match_fast = self._match_version
         else:
+            # need build info
             rx = r'^(?:%s)$' % parts[2].replace('*', r'.*')
             self.build = re.compile(rx)
             self.match_fast = self._match_full
         return self
 
     def is_exact(self):
+        """
+            The package spec has both exact version and build
+        """
         return self.match_fast == self._match_exact
 
     def is_simple(self):
+        """
+            The package is like conda
+        """
         return self.match_fast == self._match_any
 
     def _match_any(self, verison, build):
+        """
+            Match every part
+        Returns: True
+
+        """
         return True
 
     def _match_version(self, version, build):
+        """
+            The package is like conda 4.1.10
+        Returns: Bool, whether match
+
+        """
         return self.version.match(version)
 
     def _match_exact(self, version, build):
+        """
+            Both version and build is match ?
+        Args:
+            version: number , the version of package
+            build: number . the build number of a package
+
+        Returns: bool , Match or not ?
+
+        """
         return build == self.build and self.version == version
 
     def _match_full(self, version, build):
+        """
+            Both version and build is match ?
+        Args:
+            version: VersionSpec object
+            build: re
+
+        Returns:bool, Match or not ?
+
+        """
         return self.build.match(build) and self.version.match(version)
 
     def match(self, info):
+        """
+        Args:
+            info: the info of a package
+
+        Returns: bool, match or not ?
+
+        """
         if type(info) is dict:
             name = info.get('name')
             version = info.get('version')
@@ -143,6 +193,9 @@ class MatchSpec(object):
         return self.match_fast(version, build)
 
     def to_filename(self):
+        """
+            Convert to a standard filename
+        """
         if self.is_exact() and not self.optional:
             return self.name + '-%s-%s.tar.bz2' % (self.version, self.build)
         else:

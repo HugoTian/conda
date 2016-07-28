@@ -308,13 +308,19 @@ class VersionSpec(object):
     def __new__(cls, spec):
         """
             The creation of a versionspec instance
-        :param spec: a number of spec
+        :param spec: a number of spec, like 4.1.10
         :return:
+
+        self.spec : the version specification of a package
+        self.match : match function, depends on spec
+        self.op :
+        self.cmp :
         """
         if isinstance(spec, cls):
             return spec
         self = object.__new__(cls)
         self.spec = spec
+        # specify the spec match function, match_all or match_any
         if isinstance(spec, tuple):
             self.match = self.all_match_ if spec[0] == 'all' else self.any_match_
         elif regex_split_re.match(spec):

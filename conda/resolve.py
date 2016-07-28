@@ -230,6 +230,22 @@ class Package(object):
     are sortable.
     """
     def __init__(self, fn, info):
+        """
+            The initialization of a package
+        Args:
+            fn:
+            info: the info of a package
+
+        self.fn
+        self.name
+        self.version
+        self.build
+        self.build_number
+        self.channel
+        self.schannel
+        self.priority
+        self.norm_version
+        """
         self.fn = fn
         self.name = info.get('name')
         self.version = info.get('version')
@@ -283,8 +299,17 @@ class Package(object):
 
 
 class Resolve(object):
-
+    """
+        The resolver class
+    """
     def __init__(self, index, sort=False, processed=False):
+        """
+            The initialization of a resolver
+        Args:
+            index: the index comes from repository repodata
+            sort: sort ?
+            processed: Processed ?
+        """
         self.index = index
         if not processed:
             for fkey, info in iteritems(index.copy()):

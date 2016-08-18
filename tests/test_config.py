@@ -17,7 +17,7 @@ from conda.base.context import (reset_context, pkgs_dir_from_envs_dir, context)
 from conda.common.yaml import yaml_load
 from conda.utils import backoff_unlink
 from tests.helpers import run_conda_command
-
+from .test_create import run_command, Commands, make_temp_env
 # use condarc from source tree to run these tests against
 
 # # unset 'default_channels' so get_default_channels has predictable behavior
@@ -667,3 +667,17 @@ def test_set_rc_string():
 
         reset_context([rc])
         assert context.ssl_verify == 'test_string.crt'
+
+
+class IntegrationConfigTest(unittest.TestCase):
+    """
+        Integration test for conda config command
+        Especially for checking the output
+    """
+    def test_config_show(self):
+
+        with make_temp_env() as prefix:
+
+            o_1 ,e = run_command(Commands.CONFIG, prefix, "--show")
+            o_2, e = run_command(Commands.CONFIG, prefix, "--show")
+            self.assertEqual(o_1, o_2, o_1)

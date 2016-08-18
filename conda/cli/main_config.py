@@ -17,7 +17,7 @@ from ..compat import iteritems, itervalues, string_types
 from ..config import (rc_bool_keys, rc_list_keys, rc_other, rc_string_keys, sys_rc_path,
                       user_rc_path)
 from ..exceptions import CondaKeyError, CondaValueError, CouldntParseError
-
+from collections import OrderedDict
 descr = """
 Modify configuration values in .condarc.  This is modeled after the git
 config command.  Writes to the user .condarc file (%s) by default.
@@ -270,6 +270,7 @@ def execute_config(args, parser):
                              'use_pip',
                              'verbosity',
                              ))
+        d = OrderedDict(sorted(iteritems(d)))
         print(yaml_dump(d))
         return
 
